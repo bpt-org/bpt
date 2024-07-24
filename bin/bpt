@@ -6,24 +6,38 @@ CS_ROOT="$HOME/.local/opt"
 CS_BIN_DIR="${CS_ROOT}/bin"
 CS_ETC_DIR="${CS_ROOT}/etc"
 CS_VAR_DIR="${CS_ROOT}/var"
+# bpt files
+BPT_CONFIGS="${CS_ETC_DIR}/bpt/bpt.conf"
+BPT_SOURCES="${CS_ETC_DIR}/bpt/sources.list"
+BPT_BUCKETS="${CS_ETC_DIR}/bpt/buckets.list"
 # Upstream
-CS_NAME="dcc-tools"
-CS_KNOWN_BUCKETS="${CS_ROOT}/${CS_NAME}/buckets"
+CS_NAME="$(basename $0)"
+CS_KNOWN_BUCKETS="$BPT_BUCKETS"
 # Downstream
 CS_BUCKETS_DIR="${CS_VAR_DIR}/buckets"
 CS_PACKAGES_DIR="${CS_VAR_DIR}/packages"
 set +o allexport
 
-CS_CONFIGS_FILE="${CS_ROOT}/${CS_NAME}/${CS_NAME}.cfg"
-if [[ -f "${CS_ETC_DIR}/${CS_NAME}.cfg" ]] ; then
-    CS_CONFIGS_FILE="${CS_ETC_DIR}/${CS_NAME}.cfg"
-fi
+arrayBptFiles=( "$BPT_CONFIGS" "$BPT_SOURCES" "$BPT_BUCKETS" )
+
+for f in "${arrayBptFiles[@]}" ; do
+    if [[ ! -f "$f" ]] ; then
+        f_dirname="$(dirname $f)"
+        f_filename="$(basename $f)"
+        mkdir -p "$f_dirname"
+        cp "${CS_ROOT}/${CS_NAME}/${f_filename}" "$f"
+    fi
+done
+
+set -o allexport
+source "$BPT_CONFIGS"
+
 
 for arg in "$@" ; do
     case arg in
-        --config)
+        --main-bucket|-m)
             shift
-            export CS_CONFIGS_FILE="$1"
+            export default_bucket="$1"
             shift
             ;;
         --*|-*)
@@ -33,14 +47,9 @@ for arg in "$@" ; do
     esac
 done
 
-if [[ ! -f "$CS_CONFIGS_FILE" ]] ; then
-    printf -- 'error: configuration file not found\n'
-    exit
-else
-    set -o allexport
-    source "$CS_CONFIGS_FILE"
-    set +o allexport
-fi
+set +o allexport
+
+echo $default_
 
 case "$1" in
     list)
@@ -63,3 +72,4 @@ case "$1" in
         exit
         ;;
 esac
+
