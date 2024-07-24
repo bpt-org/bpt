@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+function init_filesystem_directories() {
+
+    printf -- '==> Initializing directory tree\n'
+
+    local arrayBptDirectories=( "${CS_BIN_DIR}" "${CS_ETC_DIR}" "${CS_VAR_DIR}" "${CS_BUCKETS_DIR}" "${CS_PACKAGES_DIR}" )
+
+    for d in "${arrayBptDirectories[@]}" ; do
+        if [[ ! -d "$d" ]] ; then
+            printf -- ' -> %s\n' "$d"
+            mkdir -p "$d"
+        fi
+    done
+
+}
+
+function init_program_directories() {
+
+    printf -- '==> Initializing %s files\n' "${CS_NAME}"
+
+    local arrayBptFiles=( "$BPT_CONFIGS" "$BPT_SOURCES" "$BPT_BUCKETS" )
+
+    for f in "${arrayBptFiles[@]}" ; do
+        if [[ ! -f "$f" ]] ; then
+            local f_dirname="$(dirname $f)"
+            local f_filename="$(basename $f)"
+            mkdir -p "$f_dirname"
+            printf -- ' -> %s\n' "$f"
+            cp "${CS_ROOT}/${CS_NAME}/${f_filename}" "$f"
+        fi
+    done
+
+}
+
+function init_preppend_path() {
+
+    printf -- '==> Prepending %s symlinks to PATH\n' "${CS_NAME}"
+
+    local is_in_path=$(grep "\$HOME/.local/bin" $HOME/.bashrc )
+
+    if [[ -n "$is_in_path" ]] ; then
+        printf ' -> Already in path. Skipping.\n'
+        return
+    fi
+
+    cat > "$HOME/.bashrc"  << EOF
+[[ -d "\$HOME/.local/opt/bin" ]] && PATH="\$HOME/.local/opt/bin:\$PATH\n"
+EOF
+
+}
+
+function init_program_binary_to_path() {
+
+    printf -- '==> Symlinking %s to PATH\n' "${CS_NAME}"
+
+    local self_dirname="${0%/*}"
+
+    if [[ "$self_dirname" != "${CS_ROOT}" ]] ; then
+        local source_route="${CS_ROOT}/${CS_NAME}/bin/${CS_NAME}"
+        local target_route="${CS_BIN_DIR}/${CS_NAME}"
+        printf -- '%s -> %s\n' "$source_route" "$target_route"
+        ln -sf "$source_route" "$target_route"
+    fi
+
+}
+
+function init_exec_perm_to_libexec() {
+
+    local arrayLibexec=()
+    readarray -t arrayLibexec < <(find "${CS_ROOT}/${CS_NAME}/libexec" -type f)
+
+    for l in "${arrayLibexec[@]}" ; do
+        chmod +x "$l"
+    done
+
+}

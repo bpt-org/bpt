@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+source "${CS_ROOT}/${CS_NAME}/lib/init"
+
+function init_all() {
+
+    init_filesystem_directories
+    init_program_directories
+    init_preppend_path
+    init_program_binary_to_path
+    init_exec_perm_to_libexec
+
+}

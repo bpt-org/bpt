@@ -13,38 +13,11 @@ BPT_BUCKETS="${CS_ETC_DIR}/bpt/buckets.list"
 # Upstream
 CS_NAME="$(basename $0)"
 CS_KNOWN_BUCKETS="$BPT_BUCKETS"
+CS_KNOWN_SOURCES="$BPT_SOURCES"
 # Downstream
 CS_BUCKETS_DIR="${CS_VAR_DIR}/buckets"
 CS_PACKAGES_DIR="${CS_VAR_DIR}/packages"
 set +o allexport
-
-arrayBptFiles=( "$BPT_CONFIGS" "$BPT_SOURCES" "$BPT_BUCKETS" )
-
-for f in "${arrayBptFiles[@]}" ; do
-    if [[ ! -f "$f" ]] ; then
-        f_dirname="$(dirname $f)"
-        f_filename="$(basename $f)"
-        mkdir -p "$f_dirname"
-        cp "${CS_ROOT}/${CS_NAME}/${f_filename}" "$f"
-    fi
-done
-
-arrayBptDirectories=( "${CS_BIN_DIR}" "${CS_ETC_DIR}" "${CS_VAR_DIR}" "${CS_BUCKETS_DIR}" "${CS_PACKAGES_DIR}" )
-
-for d in "${arrayBptDirectories[@]}" ; do
-    if [[ ! -d "$d" ]] ; then
-        mkdir -p "$d"
-    fi
-done
-
-self_dirname="${0%/*}"
-
-if [[ "$self_dirname" != "${CS_ROOT}" ]] ; then
-    source_route="${CS_ROOT}/${CS_NAME}/bin/${CS_NAME}"
-    target_route="${CS_BIN_DIR}/${CS_NAME}"
-    printf -- '%s -> %s\n' "$source_route" "$target_route"
-    ln -sf "$source_route" "$target_route"
-fi
 
 set -o allexport
 source "$BPT_CONFIGS"
@@ -80,6 +53,10 @@ case "$1" in
     install)
         shift
         exec "${CS_ROOT}/${CS_NAME}/libexec/install" "$@"
+        ;;
+    init)
+        source "${CS_ROOT}/${CS_NAME}/libexec/init"
+        init_all
         ;;
     *)
         printf -- 'error: %s: unknown command\n' "$1"
