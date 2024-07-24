@@ -1,12 +1,12 @@
-# DCC Tools
+# bpt - Basic/Bash Package Tooling
 
-> Skip to [Installation](#installation)
+> Skip to [Installation](#installation) | [Philosophy](#philosophy)
 
 Non-root package manager for Linux.
 
-## What does DCC Tools do?
+## What does bpt do?
 
-DCC Tools allows to install Linux programs inside the user's `$HOME`.
+bpt allows to install Linux programs inside the user's `$HOME`.
 
 This comes with several disadvantages:
 
@@ -21,74 +21,75 @@ This comes with several disadvantages:
 
 Yes, it is.
 
-## Why are you workig on this?
+## Installation
 
-> tl;dr: standardization
-
-This program was orginally developed to easily distribute scripts that wrapped
-complex commands for common chores inside the server of Computer Science
-Department (DCC) at Universidad de Chile..
-
-Realistically speaking, a non-root package manager breaks the multi-user scheme
-of a GNU/Linux system. The separation between privileged and unprivileged users
-also separates the package's management and dependency resolution.
-
-Solutions like `Flatpack` and `Snap` focus on the sandboxing aspect, however
-they also take care of the user experience and mostly target desktop users.
-
-DCC Tools aims to assist unprivileged *server* users with shell access that
-have a designated RAM, Storage and CPU quotas.
-
-If a program is needed on the server, a ticket should be raised to the system
-administrator. If a program is not provided because of a usage policy, perhaps
-you shouldn't try to install it by your own means.
-
-There is a middle ground where a program is not provided because it only applies
-to a small set of users, be it a script or a binary file. Those are the *tools*
-whose managment this package manager tries to ease. 
-
-DCC Tools approach to handle programs is heavily inspired on Archlinux's
-[`PKGBUILD`](https://man.archlinux.org/man/core/pacman/PKGBUILD.5.en) files.
-It aims to provide a replicable set of instructions in the form of a template,
-allowing the creation of packages targeting the server of the user.
-
-To ease distribution and compatibility, DCC Tools follows the approach of
-[`scoop`](https://github.com/ScoopInstaller/Scoop) by using git as a backend
-and the system's shell as its programming language. Both programs are part
-of most educational and research servers, the target users of DCC Tools.
-
-# Installation
-
-> A installation script is in progress,
-> the goal is to let `dcc-tools` install itself
-
-DCC Tools tries to follow [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html),
-therefore it does not create a dotfile. However, conflicts will arise
-if the program files and the user-generated files share the same directories.
-
-To avoid this issue, the following directories are used by DCC Tools:
-
-* `$HOME/.local/opt/<program>`: root directory for each program
-* `$HOME/.local/opt/bin`: symlinks for each `<program>/bin`
-
-
-> This is a decision is based on [FHS for /opt](https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch03s13.html).
-
-The only modification needed on the current environment is to define:
-
-* `PATH=$HOME/.local/opt/bin:PATH`
-
-1. Clone this repository:
+bpt needs to be unpacked manually:
 ```
-git clone https://github.com/dcc-tools/dcc-tools $HOME/.local/opt/dcc-tools
+tar -xf bpt-any.tar.xz -C $HOME/.local/opt
 ```
 
-2. Clone the main bucket:
+Then chmod and run the deployment script:
 ```
-git clone https://github.com/dcc-tools/main $HOME/.local/opt/dcc-tools/buckets
+$HOME/.local/opt/libexec/deploy
 ```
 
-3. Initialize DCC Tools:
+## Philosophy
+
+### Directories
+
+This is the directory tree for bpt:
+
 ```
-$HOME/.local/top/dcc-tools/libexec/tools-init.sh
+HOME/.local/opt/bin
+HOME/.local/opt/bin/bpt
+HOME/.local/opt/etc
+HOME/.local/opt/etc/bpt
+HOME/.local/opt/etc/bpt/bpt.conf
+HOME/.local/opt/etc/bpt/bpt.conf.d
+HOME/.local/opt/etc/sources.list
+HOME/.local/opt/var
+HOME/.local/opt/var/packages
+HOME/.local/opt/var/buckets
+HOME/.local/opt/var/buckets/main
 ```
+
+We'll refer to `HOME/.local/opt` as `ROOT`.
+
+To avoid conflicts with XDG Base Dir Specs, every program is installed
+on its own directory under `ROOT` and the binary files symlinked to `ROOT/bin`.
+
+By including `ROOT/bin` to path, the user's personal `bin` remains free.
+
+### Packages
+
+bpt saves its available packages inside `ROOT/var/packages` and checks for
+a matching program name on each installation.
+
+If more than one version is available, a prompt will let the user choose.
+Reinstallations and (up|down)grades are also handled by bpt.
+
+If there are no packages matching the program name, the user will have
+to build a package from a *bucket* or fetch one from a *source*.
+
+#### Buckets
+
+This are git repositories containing PKGBUILD files with the commands and
+files for bpt to compile and package the program.
+
+The PKGBUILD's variables and functions are a subset of Archlinux's
+and bpt tries to stay compatible with them. HOWEVER, bpt WILL NEVER fetch
+directly files from AUR. We don't endorse DDoSSing their servers with queries.
+
+bpt offers a default bucket called `main` with a selection of progrmas. The name
+does not have to be prefixed to install programs, unless the default bucket
+is changed with `--main-bucket|-m`.
+
+Every package built from a bucket will become available inside `ROOT/var/packages`.
+
+### Sources
+
+This are websites that serve ready-to-install packages, they are first downloaded
+by bpt inside `ROOT/var/packages` and then become available for installation.
+
+Keep in mind that packages are built against the system's libraries, therefore they
+are specificly made for the machine they were built against.
