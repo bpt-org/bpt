@@ -49,8 +49,6 @@ done
 
 set +o allexport
 
-echo $default_
-
 case "$1" in
     list)
         exec "${CS_ROOT}/${CS_NAME}/libexec/list"
