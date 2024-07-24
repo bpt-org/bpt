@@ -23,12 +23,82 @@ function get_bucket_and_program() {
 
 }
 
+function protocol_handler_http() {
+
+    local filename="$1"
+    local url="$2"
+
+    printf -- '%s\n' "$url"
+    curl -L "$url" --output "${srcdir}/${filename}"
+
+    if [[ $? -ne 0 ]] ; then
+        printf -- 'error: failed to download %s\n' "$filename"
+        exit
+    fi
+
+    arraySourceFiles+=($filename)
+
+}
+
+function protocol_handler_git() {
+
+    local dirname="$1"
+    local url="$2"
+
+    git clone "$url" "${srcdir}/${dirname}"
+
+    if [[ $? -ne 0 ]] ; then
+        printf -- 'error: failed to clone repository\n'
+        exit
+    fi
+
+}
+
+function protocol_handler() {
+
+    local input_name="$1"
+    local input_url="$2"
+
+    IFS='+' read -a arrayUrl <<< "$input_url"
+
+    if [[ ${#arrayUrl[@]} -eq 1 ]] ; then
+
+        local protocol=$(printf -- "${arrayUrl[0]}" | cut -d ':' -f1)
+        case $protocol in
+            https|http)
+                protocol_handler_http "$input_name" "$input_url"
+                ;;
+            *)
+                printf -- 'error: %s: protocol not supported\n' "$protocol"
+                exit
+                ;;
+        esac
+
+    elif [[ ${#arrayUrl[@]} -eq 2 ]] ; then
+
+        local protocol="${arrayUrl[0]}"
+        case $protocol in
+            git)
+                protocol_handler_git "$input_name" "${arrayUrl[1]}"
+                ;;
+            *)
+                printf -- 'error: %s: protocol not supported\n' "$protocol"
+                exit
+                ;;
+        esac
+
+    elif [[ ${#arrayUrl[@]} -gt 2 ]] ; then
+        printf -- 'error: source url accepts at most two + separated parameters\n'
+        exit
+    fi
+
+}
+
 function run_download() {
 
     printf -- '==> Downloading sources...\n'
 
     for f in "${source[@]}" ; do
-
         f=$(printf -- "$f" | sed 's/::/ /')
 
         read -a arrayF <<< $f
@@ -36,18 +106,10 @@ function run_download() {
             printf -- 'error: source element accepts exactly two parameters\n'
         fi
 
-        local filename=$(printf -- "$f" | cut -d ' ' -f1 )
-        local url=$(printf -- "$f" | cut -d ' ' -f2 )
+        local input_name=$(printf -- "$f" | cut -d ' ' -f1 )
+        local input_url=$(printf -- "$f" | cut -d ' ' -f2 )
 
-        printf -- '%s\n' "$url"
-        curl -L "$url" --output "${srcdir}/${filename}"
-
-        if [[ $? -ne 0 ]] ; then
-            printf -- 'error: failed to download %s\n' "$filename"
-            exit
-        fi
-
-        arraySourceFiles+=($filename)
+        protocol_handler "$input_name" "$input_url"
     done
 
 }
