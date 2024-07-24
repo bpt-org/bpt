@@ -37,6 +37,15 @@ for d in "${arrayBptDirectories[@]}" ; do
     fi
 done
 
+self_dirname="${0%/*}"
+
+if [[ "$self_dirname" != "${CS_ROOT}" ]] ; then
+    source_route="${CS_ROOT}/${CS_NAME}/bin/${CS_NAME}"
+    target_route="${CS_BIN_DIR}/${CS_NAME}"
+    printf -- '%s -> %s\n' "$source_route" "$target_route"
+    ln -sf "$source_route" "$target_route"
+fi
+
 set -o allexport
 source "$BPT_CONFIGS"
 
