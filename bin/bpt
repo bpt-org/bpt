@@ -29,9 +29,16 @@ for f in "${arrayBptFiles[@]}" ; do
     fi
 done
 
+arrayBptDirectories=( "${CS_BIN_DIR}" "${CS_ETC_DIR}" "${CS_VAR_DIR}" "${CS_BUCKETS_DIR}" "${CS_PACKAGES_DIR}" )
+
+for d in "${arrayBptDirectories[@]}" ; do
+    if [[ ! -d "$d" ]] ; then
+        mkdir -p "$d"
+    fi
+done
+
 set -o allexport
 source "$BPT_CONFIGS"
-
 
 for arg in "$@" ; do
     case arg in
