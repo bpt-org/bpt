@@ -36,9 +36,16 @@ function bucket_add() {
         valid_url "$url"
 
     elif [[ -z $url && -n $is_official ]] ; then
-        url="${is_official##*::}"
+        url="$(printf -- "$is_official" | cut -d ' ' -f2)"
         printf -- 'info: known bucket\n'
         printf -- 'info: %s\n' "$url"
+
+        local branch="$(printf -- "$is_official" | cut -d ' ' -f3)"
+
+        if [[ -n "$branch" ]] ; then
+            git clone -b "$branch" "$url" "${CS_BUCKETS_DIR}/${name}"
+            return
+        fi
 
     elif [[ -n $url && -n $is_official ]] ; then
         printf -- 'warning: overriding a known bucket\n'
