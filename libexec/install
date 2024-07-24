@@ -17,7 +17,8 @@ arrayTargetPkg=()
 for pkg in "${arrayPkgFiles[@]}" ; do
 
     pkg_name_ver="${pkg%.tar.xz}"
-    pkg_name="${pkg%-*}"
+    pkg_name=$(printf "${pkg::-1}" | sed 's#[^-]*$##') # remove everything after last - char
+    pkg_name="${pkg_name::-1}" # remove - leftover at end of string
 
     if [[ "$pkg_name" == "$target_package" ]] ; then
         arrayTargetPkg+=($pkg_name_ver)
