@@ -75,3 +75,13 @@ function init_exec_perm_to_libexec() {
     done
 
 }
+
+function init_clone_main_bucket() {
+
+    printf -- '==> Adding main bucket\n'
+
+    local cs_name_exec="${CS_BIN_DIR}/${CS_NAME}"
+    printf -- " -> ${CS_NAME} bucket add main\n"
+    $cs_name_exec bucket add main
+
+}
