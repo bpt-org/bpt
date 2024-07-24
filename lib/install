@@ -20,25 +20,41 @@ function deploy_symlinks() {
 function unpack_tarball() {
 
     local pkg_name_ver="$1"
+    local pkg_ver="${pkg_name_ver##*-}"
     local pkg_name="${pkg_name_ver%-*}"
 
     if [[ -d "${CS_ROOT}/${pkg_name}" ]] ; then
-        printf -- 'Package already installed. Overwrite? [y|n] '
-        read -r ans
+        source "${CS_ROOT}/${pkg_name}/.PKGINFO"
 
-        if [[ "$ans" != "y" ]] ; then
-            return
+        if [[ "$pkg_ver" != "$pkgver" ]] ; then
+
+            printf -- 'Version %s installed. Replace with version %s? [y|n]\n '
+            read -r ans
+
+            if [[ "$ans" =! "y" ]] ; then
+                return
+            fi
+
+            printf -- '==> Updating %s\n' "$pkg_name"
+
+        else
+
+            printf -- 'Package already installed. Reinstall? [y|n] '
+            read -r ans
+
+            if [[ "$ans" != "y" ]] ; then
+                return
+            fi
+
+            printf -- '==> Reinstalling %s\n' "$pkg_name"
         fi
-
-        printf -- '==> Reinstalling %s\n' "$pkg_name"
-        rm -rf "${CS_ROOT}/${pkg_name}"
 
     else
         printf -- '==> Installing %s\n' "$pkg_name"
     fi
 
     printf -- '%s -> %s\n' "${pkg_name_ver}.tar.xz"  "${CS_ROOT}/${pkg_name}"
-
+    rm -rf "${CS_ROOT}/${pkg_name}"
     tar -xf "${CS_PACKAGES_DIR}/${pkg_name_ver}.tar.xz" -C "${CS_ROOT}"
 
     deploy_symlinks ${pkg_name}
