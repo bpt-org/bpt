@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "${CS_ROOT}/dcc-tools/lib/bucket"
+source "${CS_ROOT}/${CS_NAME}/lib/bucket"
 
 case "$1" in
     add)
