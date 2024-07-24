@@ -84,6 +84,10 @@ function run_build() {
     printf -- '==> Building program...\n'
     build
 
+    touch "${pkgdir}/.PKGINFO"
+    printf -- 'pkgver=%s\n' "$pkgver" >> "${pkgdir}/.PKGINFO"
+    printf -- 'pkgrel=%s\n' "$pkgrel" >> "${pkgdir}/.PKGINFO"
+
 }
 
 function run_package() {
