@@ -28,10 +28,10 @@ function unpack_tarball() {
 
         if [[ "$pkg_ver" != "$pkgver" ]] ; then
 
-            printf -- 'Version %s installed. Replace with version %s? [y|n]\n '
+            printf -- 'Version %s installed. Replace with version %s? [y|n] ' "$pkgver" "$pkg_ver"
             read -r ans
 
-            if [[ "$ans" =! "y" ]] ; then
+            if [[ "$ans" != "y" ]] ; then
                 return
             fi
 
