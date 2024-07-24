@@ -3,7 +3,7 @@
 function tools_list() {
 
     local symlinkArray=()
-    readarray -t symlinkArray < <(find "${CS_ROOT}/bin" -type l)
+    readarray -t symlinkArray < <(find "${CS_BIN_DIR}" -type l)
 
     for b in "${symlinkArray[@]}" ; do
         printf -- '%s\n' "$(basename $b)"
