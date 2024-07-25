@@ -17,25 +17,7 @@ CS_KNOWN_SOURCES="$BPT_SOURCES"
 # Downstream
 CS_BUCKETS_DIR="${CS_VAR_DIR}/buckets"
 CS_PACKAGES_DIR="${CS_VAR_DIR}/packages"
-set +o allexport
-
-set -o allexport
 source "$BPT_CONFIGS"
-
-for arg in "$@" ; do
-    case arg in
-        --main-bucket|-m)
-            shift
-            export default_bucket="$1"
-            shift
-            ;;
-        --*|-*)
-            printf -- 'error: %s: unkown option\n' "$1"
-            exit
-            ;;
-    esac
-done
-
 set +o allexport
 
 case "$1" in
