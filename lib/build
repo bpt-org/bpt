@@ -146,9 +146,13 @@ function run_build() {
     printf -- '==> Building program...\n'
     build
 
-    touch "${pkgdir}/.PKGINFO"
-    printf -- 'pkgver=%s\n' "$pkgver" >> "${pkgdir}/.PKGINFO"
-    printf -- 'pkgrel=%s\n' "$pkgrel" >> "${pkgdir}/.PKGINFO"
+}
+
+function add_pkginfo() {
+
+    local pkginfo="${pkgdir}/${pkgname}/.PKGINFO"
+    printf -- 'pkgver=%s\n' "$pkgver" >> "$pkginfo"
+    printf -- 'pkgrel=%s\n' "$pkgrel" >> "$pkginfo"
 
 }
 
@@ -156,6 +160,8 @@ function run_package() {
 
     printf -- '==> Packaging program...\n'
     package
+
+    add_pkginfo
 
     tar -cf "${CS_PACKAGES_DIR}/${pkgname}-${pkgver}.tar.xz" -C "${pkgdir}" .
 
