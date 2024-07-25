@@ -23,7 +23,7 @@ function get_name_version_release() {
 
     local f_name_ver_rel=${f_name_ver_rel_ext/$PKGEXT/}
     local f_name_ver=${f_name_ver_rel%-*}
-    local f_name${f_name_ver%-*}
+    local f_name=${f_name_ver%-*}
 
     local f_rel=${f_name_ver_rel/${f_name_ver}-/}
     local f_ver=${f_name_ver/${f_name}-/}
@@ -32,11 +32,95 @@ function get_name_version_release() {
 
 }
 
+function check_pkg_dir_not_empty() {
+
+    readarray -t arrayPkgFiles < <(find "${CS_PACKAGES_DIR}" -type f -printf '%f\n')
+
+    if [[ "${#arrayPkgFiles[@]}" -eq 0 ]] ; then
+        printf -- 'No packages available\n'
+        exit
+    fi
+
+}
+
+function get_pkg_matches_with_target() {
+
+    for pkg in "${arrayPkgFiles[@]}" ; do
+
+         local pkg_info=( $(get_name_version_release "$pkg") )
+
+         local pkg_name=${pkg_info[0]}
+         local pkg_ver=${pkg_info[1]}
+         local pkg_rel=${pkg_info[2]}
+
+        if [[ "$pkg_name" == "$target_package" ]] ; then
+            arrayTargetPkg+=("${pkg_name}-${pkg_ver}-${pkg_rel}")
+        fi
+
+    done
+
+}
+
+function answer_yes_or_exit() {
+
+    read -r ans
+
+    if [[ "$ans" != 'y' ]] ; then
+        exit
+    fi
+
+}
+
+function match_none() {
+
+    printf -- 'Package not found for %s\n' "$target_package"
+    exit
+
+}
+
+function match_single() {
+
+    printf -- 'Package version is %s. Proceed? [y|n] ' "${arrayTargetPkg[0]##*-}"
+    answer_yes_or_exit
+
+}
+
+function match_multiple() {
+
+    printf -- '==> Multiple packages found\n'
+
+    declare -i count
+    count=0
+
+    for pkg in "${arrayTargetPkg[@]}" ; do
+        printf -- "[$count] %s\n" "$pkg"
+        count+=1
+    done
+
+    unset number
+    until [[ $number == +([0-9]) ]] ; do
+        read -r -p 'Choose an index number: ' number
+    done
+
+    if [[ $number -gt $(($count-1)) ]] ; then
+        printf -- 'error: index out of rage\n'
+        exit
+
+    else
+        unpack_tarball "${arrayTargetPkg[$number]}"
+    fi
+
+}
+
 function unpack_tarball() {
 
-    local pkg_name_ver="$1"
-    local pkg_ver="${pkg_name_ver##*-}"
-    local pkg_name="${pkg_name_ver%-*}"
+    local pkg_name_ver_rel="$1"
+
+    pkg_info=( $(get_name_version_release "$pkg_name_ver_rel") )
+
+    local pkg_name=${pkg_info[0]}
+    local pkg_ver=${pkg_info[1]}
+    local pkg_rel=${pkg_info[2]}
 
     if [[ -d "${CS_ROOT}/${pkg_name}" ]] ; then
         source "${CS_ROOT}/${pkg_name}/.PKGINFO"
@@ -44,23 +128,13 @@ function unpack_tarball() {
         if [[ "$pkg_ver" != "$pkgver" ]] ; then
 
             printf -- 'Version %s installed. Replace with version %s? [y|n] ' "$pkgver" "$pkg_ver"
-            read -r ans
-
-            if [[ "$ans" != "y" ]] ; then
-                return
-            fi
-
+            answer_yes_or_exit
             printf -- '==> Updating %s\n' "$pkg_name"
 
         else
 
             printf -- 'Package already installed. Reinstall? [y|n] '
-            read -r ans
-
-            if [[ "$ans" != "y" ]] ; then
-                return
-            fi
-
+            answer_yes_or_exit
             printf -- '==> Reinstalling %s\n' "$pkg_name"
         fi
 
@@ -68,9 +142,9 @@ function unpack_tarball() {
         printf -- '==> Installing %s\n' "$pkg_name"
     fi
 
-    printf -- '%s -> %s\n' "${pkg_name_ver}.tar.xz"  "${CS_ROOT}/${pkg_name}"
+    printf -- '%s -> %s\n' "${pkg_name}-${pkg_ver}-${pkg_rel}.tar.xz"  "${CS_ROOT}/${pkg_name}"
     rm -rf "${CS_ROOT}/${pkg_name}"
-    tar -xf "${CS_PACKAGES_DIR}/${pkg_name_ver}.tar.xz" -C "${CS_ROOT}"
+    tar -xf "${CS_PACKAGES_DIR}/${pkg_name}-${pkg_ver}-${pkg_rel}.tar.xz" -C "${CS_ROOT}"
 
     deploy_symlinks ${pkg_name}
 

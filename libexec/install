@@ -5,63 +5,18 @@ source "${CS_ROOT}/${CS_NAME}/lib/install"
 target_package="$1"
 
 arrayPkgFiles=()
-readarray -t arrayPkgFiles < <(find "${CS_PACKAGES_DIR}" -type f -printf '%f\n')
-
-if [[ "${#arrayPkgFiles[@]}" -eq 0 ]] ; then
-    printf -- 'No packages available\n'
-    exit
-fi
+check_pkg_dir_not_empty
 
 arrayTargetPkg=()
-
-for pkg in "${arrayPkgFiles[@]}" ; do
-
-    pkg_name_ver="${pkg%.tar.xz}"
-    pkg_name=$(printf "${pkg::-1}" | sed 's#[^-]*$##') # remove everything after last - char
-    pkg_name="${pkg_name::-1}" # remove - leftover at end of string
-
-    if [[ "$pkg_name" == "$target_package" ]] ; then
-        arrayTargetPkg+=($pkg_name_ver)
-    fi
-
-done
+get_pkg_matches_with_target
 
 if [[ "${#arrayTargetPkg[@]}" -eq 0 ]] ; then
-    printf -- 'Package not found for %s\n' "$target_package"
-    exit
+    match_none
 
 elif [[ "${#arrayTargetPkg[@]}" -eq 1 ]] ; then
-    printf -- 'Package version is %s. Proceed? [y|n] ' "${arrayTargetPkg[0]##*-}"
-    read -r ans
-
-    if [[ "$ans" != 'y' ]] ; then
-        exit
-    fi
-
+    match_single
     unpack_tarball "${arrayTargetPkg[0]}"
 
 elif [[ "${#arrayTargetPkg[@]}" -gt 1 ]] ; then
-
-    printf -- '==> Multiple packages found\n'
-
-    declare -i count
-    count=0
-
-    for pkg in "${arrayTargetPkg[@]}" ; do
-        printf -- "[$count] %s\n" "$pkg"
-        count+=1
-    done
-
-    unset number
-    until [[ $number == +([0-9]) ]] ; do
-        read -r -p 'Choose an index number: ' number
-    done
-
-    if [[ $number -gt $(($count-1)) ]] ; then
-        printf -- 'error: index out of rage\n'
-        exit
-
-    else
-        unpack_tarball "${arrayTargetPkg[$number]}"
-    fi
+    match_multiple
 fi
