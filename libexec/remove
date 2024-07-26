@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+source "${CS_ROOT}/${CS_NAME}/lib/remove"
+
+
+function remove_program() {
+
+    local program="$1"
+    check_protected_directories "$program"
+
+    local location="${CS_ROOT}/${program}"
+
+    if [[ ! -d "${location}" ]] ; then
+        printf -- 'Program not installed\n'
+        exit
+    fi
+
+    remove_symlinks "$program"
+    printf -- '==> Removing %s\n' "$program"
+
+    rm -rf "${location}"
+    printf -- '%s -> Deleted\n' "$location"
+
+}
+
+if [[ ${#@} -eq 0 ]] ; then
+    printf -- 'error: program name not given\n'
+    exit
+fi
+
+remove_program "$1"

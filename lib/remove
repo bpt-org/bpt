@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+function remove_symlinks() {
+
+    local prog_name="$1"
+
+    local arrayBinary
+    readarray -t arrayBinary < <(find "${CS_ROOT}/${prog_name}/bin" -type f)
+
+    printf -- '==> Removing symlinks\n'
+
+    for b in ${arrayBinary[@]} ; do
+        b_name=$(basename $b)
+        rm "${CS_BIN_DIR}/${b_name}"
+        printf -- '%s -> Deleted\n' "${CS_BIN_DIR}/${b_name}"
+    done
+
+}
+
+function check_protected_directories() {
+
+    local dir="$1"
+
+    local hit_protected=1
+
+    case $dir in
+        bin)
+            hit_protected=0
+            ;;
+        bpt)
+            hit_protected=0
+            ;;
+        etc)
+            hit_protected=0
+            ;;
+        var)
+            hit_protected=0
+            ;;
+    esac
+
+    if [[ $hit_protected -eq 0 ]] ; then
+        printf -- 'Access denied: %s is protected\n' "$dir"
+        exit
+    fi
+
+}

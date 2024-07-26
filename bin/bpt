@@ -36,6 +36,10 @@ case "$1" in
         shift
         exec "${CS_ROOT}/${CS_NAME}/libexec/install" "$@"
         ;;
+    remove)
+        shift
+        exec "${CS_ROOT}/${CS_NAME}/libexec/remove" "$@"
+        ;;
     init)
         source "${CS_ROOT}/${CS_NAME}/libexec/init"
         init_all
