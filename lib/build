@@ -163,7 +163,7 @@ function run_package() {
 
     add_pkginfo
 
-    tar -cf "${CS_PACKAGES_DIR}/${pkgname}-${pkgver}-${pkgrel}.tar.xz" -C "${pkgdir}" .
+    tar -cf "${CS_PACKAGES_DIR}/${bucket}/${pkgname}-${pkgver}-${pkgrel}.tar.xz" -C "${pkgdir}" .
 
 }
 
