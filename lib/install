@@ -21,16 +21,23 @@ function deploy_symlinks() {
 
 function check_pkg_dir_not_empty() {
 
-    readarray -t arrayPkgFiles < <(find "${CS_PACKAGES_DIR}" -type f -printf '%f\n')
+    local bucket="$1"
+
+    if [[ ! -d "${CS_PACKAGES_DIR}/${bucket}" ]] ; then
+        return 1
+    fi
+
+    readarray -t arrayPkgFiles < <(find "${CS_PACKAGES_DIR}/${bucket}" -type f -printf '%f\n')
 
     if [[ "${#arrayPkgFiles[@]}" -eq 0 ]] ; then
-        printf -- 'No packages available\n'
-        exit
+        return 2
     fi
 
 }
 
-function get_pkg_matches_with_target() {
+function get_pkg_matches() {
+
+    local target_package="$1"
 
     for pkg in "${arrayPkgFiles[@]}" ; do
 
@@ -46,6 +53,10 @@ function get_pkg_matches_with_target() {
 
     done
 
+    if [[ ${#arrayTargetPkg[@]} -eq 0 ]] ; then
+        return 1
+    fi
+
 }
 
 function answer_yes_or_exit() {
@@ -58,17 +69,14 @@ function answer_yes_or_exit() {
 
 }
 
-function match_none() {
-
-    printf -- 'Package not found for %s\n' "$target_package"
-    exit
-
-}
-
 function match_single() {
 
-    printf -- 'Package version is %s. Proceed? [y|n] ' "${arrayTargetPkg[0]##*-}"
+    local pkg_info=( $(get_name_version_release "${arrayTargetPkg[0]}") )
+    local pkg_ver=${pkg_info[1]}
+
+    printf -- 'Package version is %s. Proceed? [y|n] ' "${pkg_ver}"
     answer_yes_or_exit
+    unpack_tarball "${arrayTargetPkg[0]}"
 
 }
 
@@ -102,8 +110,7 @@ function match_multiple() {
 function unpack_tarball() {
 
     local pkg_name_ver_rel="$1"
-
-    pkg_info=( $(get_name_version_release "$pkg_name_ver_rel") )
+    local pkg_info=( $(get_name_version_release "$pkg_name_ver_rel") )
 
     local pkg_name=${pkg_info[0]}
     local pkg_ver=${pkg_info[1]}

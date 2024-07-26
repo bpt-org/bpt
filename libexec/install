@@ -2,21 +2,47 @@
 
 source "${CS_ROOT}/${CS_NAME}/lib/install"
 
-target_package="$1"
+function install_program() {
 
-arrayPkgFiles=()
-check_pkg_dir_not_empty
+    local raw_input="$1"
 
-arrayTargetPkg=()
-get_pkg_matches_with_target
+    local sanitized_input=( $(get_bucket_and_program "$raw_input") )
 
-if [[ "${#arrayTargetPkg[@]}" -eq 0 ]] ; then
-    match_none
+    if [[ $? -eq 3 ]] ; then
+        printf -- 'error: nested buckets not allowed\n'
+        exit
+    fi
 
-elif [[ "${#arrayTargetPkg[@]}" -eq 1 ]] ; then
-    match_single
-    unpack_tarball "${arrayTargetPkg[0]}"
+    local bucket="${sanitized_input[0]}"
+    local program="${sanitized_input[1]}"
 
-elif [[ "${#arrayTargetPkg[@]}" -gt 1 ]] ; then
-    match_multiple
+    arrayPkgFiles=()
+    check_pkg_dir_not_empty "$bucket"
+
+    if [[ $? -ne 0 ]] ; then
+        printf -- 'No packages available\n'
+        exit
+    fi
+
+    arrayTargetPkg=()
+    get_pkg_matches "$program"
+
+    if [[ $? -eq 1 ]] ; then
+        printf -- 'Package not found for %s\n' "$program"
+        exit
+
+    elif [[ "${#arrayTargetPkg[@]}" -eq 1 ]] ; then
+        match_single
+
+    elif [[ "${#arrayTargetPkg[@]}" -gt 1 ]] ; then
+        match_multiple
+    fi
+
+}
+
+if [[ ${#@} -eq 0 ]] ; then
+    printf -- 'error: program name not given\n'
+    exit
 fi
+
+install_program "$1"
