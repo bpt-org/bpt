@@ -61,3 +61,21 @@ function get_name_version_release() {
     printf -- '%s %s %s' "$f_name" "$f_ver" "$f_rel"
 
 }
+
+#######################################
+# Prompt user to press y or exit program
+# Arguments:
+#   None
+# Returns:
+#   0 if user presses y
+#######################################
+function answer_yes_or_exit() {
+
+    read -r ans
+
+    if [[ "$ans" != 'y' ]] ; then
+        exit
+    fi
+
+}
+

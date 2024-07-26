@@ -59,16 +59,6 @@ function get_pkg_matches() {
 
 }
 
-function answer_yes_or_exit() {
-
-    read -r ans
-
-    if [[ "$ans" != 'y' ]] ; then
-        exit
-    fi
-
-}
-
 function match_single() {
 
     local pkg_info=( $(get_name_version_release "${arrayTargetPkg[0]}") )
