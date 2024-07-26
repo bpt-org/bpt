@@ -45,7 +45,14 @@ function protocol_handler_git() {
     local dirname="$1"
     local url="$2"
 
-    git clone "$url" "${srcdir}/${dirname}"
+    local target_dir="${srcdir}/${dirname}"
+
+    if [[ -d "$target_dir" ]] ; then
+        git -C "$target_dir" pull
+
+    else
+        git clone "$url" "${srcdir}/${dirname}"
+    fi
 
     if [[ $? -ne 0 ]] ; then
         printf -- 'error: failed to clone repository\n'
