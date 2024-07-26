@@ -8,11 +8,6 @@ function build_program() {
 
     local sanitized_input=$(get_bucket_and_program "$raw_input")
 
-    if [[ $? -eq 3 ]] ; then
-        printf -- 'error: nested buckets not allowed\n'
-        exit
-    fi
-
     local bucket=$(printf -- "$sanitized_input" | cut -d ' ' -f1)
     local program=$(printf -- "$sanitized_input" | cut -d ' ' -f2)
 

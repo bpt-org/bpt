@@ -28,7 +28,8 @@ function get_bucket_and_program() {
         program="${arrayInput[1]}"
 
     elif [[ "${#arrayInput[@]}" -ge 3 ]] ; then
-        return 3
+        printf -- 'error: nested buckets not allowed\n'
+        exit
     fi
 
     printf -- "${bucket} ${program}"
