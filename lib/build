@@ -1,27 +1,6 @@
 #!/usr/bin/env bash
 
-function get_bucket_and_program() {
-
-    local raw_input="$1"
-    local bucket=$default_bucket
-    local program=""
-
-    IFS='/' read -r -a arrayInput <<< "$raw_input"
-
-    if [[ "${#arrayInput[@]}" -eq 1 ]] ; then
-        program="${arrayInput[0]}"
-
-    elif [[ "${#arrayInput[@]}" -eq 2 ]] ; then
-        bucket="${arrayInput[0]}"
-        program="${arrayInput[1]}"
-
-    elif [[ "${#arrayInput[@]}" -ge 3 ]] ; then
-        return 3
-    fi
-
-    printf -- "${bucket} ${program}"
-
-}
+source "${CS_ROOT}/${CS_NAME}/lib/shared"
 
 function protocol_handler_http() {
 
