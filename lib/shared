@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+#
+# Shared functions between libraries
+
+#######################################
+# Sanitize input of bucket and program names
+# Globals:
+#   default_bucket
+# Arguments:
+#   User input in the form <bucket>/<program>
+# Outputs:
+#   Array with bucket and program names
+#######################################
+function get_bucket_and_program() {
+
+    local raw_input="$1"
+    # TODO(tvillega): Must use uppercase to indicate is global
+    local bucket=$default_bucket
+    local program=""
+
+    IFS='/' read -r -a arrayInput <<< "$raw_input"
+
+    if [[ "${#arrayInput[@]}" -eq 1 ]] ; then
+        program="${arrayInput[0]}"
+
+    elif [[ "${#arrayInput[@]}" -eq 2 ]] ; then
+        bucket="${arrayInput[0]}"
+        program="${arrayInput[1]}"
+
+    elif [[ "${#arrayInput[@]}" -ge 3 ]] ; then
+        return 3
+    fi
+
+    printf -- "${bucket} ${program}"
+
+}
+
+#######################################
+# Get program information from package filename
+# Globals:
+#   PKGEXT
+# Arguments:
+#   Package filename
+# Outputs:
+#   Array with name, version and release
+#######################################
+function get_name_version_release() {
+
+    local f_name_ver_rel_ext="$1"
+
+    local f_name_ver_rel=${f_name_ver_rel_ext/$PKGEXT/}
+    local f_name_ver=${f_name_ver_rel%-*}
+    local f_name=${f_name_ver%-*}
+
+    local f_rel=${f_name_ver_rel/${f_name_ver}-/}
+    local f_ver=${f_name_ver/${f_name}-/}
+
+    printf -- '%s %s %s' "$f_name" "$f_ver" "$f_rel"
+
+}
