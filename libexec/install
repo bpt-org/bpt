@@ -32,10 +32,10 @@ function install_program() {
         exit
 
     elif [[ "${#arrayTargetPkg[@]}" -eq 1 ]] ; then
-        match_single
+        match_single "$bucket"
 
     elif [[ "${#arrayTargetPkg[@]}" -gt 1 ]] ; then
-        match_multiple
+        match_multiple "$bucket"
     fi
 
 }

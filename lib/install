@@ -61,16 +61,19 @@ function get_pkg_matches() {
 
 function match_single() {
 
+    local pkg_bucket="$1"
     local pkg_info=( $(get_name_version_release "${arrayTargetPkg[0]}") )
     local pkg_ver=${pkg_info[1]}
 
     printf -- 'Package version is %s. Proceed? [y|n] ' "${pkg_ver}"
     answer_yes_or_exit
-    unpack_tarball "${arrayTargetPkg[0]}"
+    unpack_tarball "${arrayTargetPkg[0]}" "$pkg_bucket"
 
 }
 
 function match_multiple() {
+
+    local pkg_bucket="$1"
 
     printf -- '==> Multiple packages found\n'
 
@@ -92,7 +95,7 @@ function match_multiple() {
         exit
 
     else
-        unpack_tarball "${arrayTargetPkg[$number]}"
+        unpack_tarball "${arrayTargetPkg[$number]}" "$pkg_bucket"
     fi
 
 }
@@ -100,6 +103,7 @@ function match_multiple() {
 function unpack_tarball() {
 
     local pkg_name_ver_rel="$1"
+    local pkg_bucket="$2"
     local pkg_info=( $(get_name_version_release "$pkg_name_ver_rel") )
 
     local pkg_name=${pkg_info[0]}
@@ -128,7 +132,7 @@ function unpack_tarball() {
 
     printf -- '%s -> %s\n' "${pkg_name}-${pkg_ver}-${pkg_rel}.tar.xz"  "${CS_ROOT}/${pkg_name}"
     rm -rf "${CS_ROOT}/${pkg_name}"
-    tar -xf "${CS_PACKAGES_DIR}/${pkg_name}-${pkg_ver}-${pkg_rel}.tar.xz" -C "${CS_ROOT}"
+    tar -xf "${CS_PACKAGES_DIR}/${pkg_bucket}/${pkg_name}-${pkg_ver}-${pkg_rel}.tar.xz" -C "${CS_ROOT}"
 
     deploy_symlinks ${pkg_name}
 
