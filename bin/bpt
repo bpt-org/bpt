@@ -20,6 +20,10 @@ CS_PACKAGES_DIR="${CS_VAR_DIR}/packages"
 source "$BPT_CONFIGS"
 set +o allexport
 
+if [[ -n "$PKGDEST" ]] ; then
+    export CS_PACKAGES_DIR="$PKGDEST"
+fi
+
 case "$1" in
     list)
         exec "${CS_ROOT}/${CS_NAME}/libexec/list"
