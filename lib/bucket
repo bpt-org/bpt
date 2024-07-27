@@ -26,6 +26,12 @@ function bucket_add() {
         exit
     fi
 
+    if [[ -d "${CS_BUCKETS_DIR}/${name}/.git" ]] ; then
+        local git_output=$(git -C "${CS_BUCKETS_DIR}/${name}" pull)
+        printf ' -> %s\n' "$git_output"
+        exit
+    fi
+
     local is_official=$(grep "$name" $CS_KNOWN_BUCKETS)
 
     if [[ -z $url && -z $is_official ]] ; then
