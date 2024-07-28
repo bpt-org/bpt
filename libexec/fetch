@@ -35,7 +35,7 @@ function fetch_program() {
     # exit status of the creation of the local variable;
     # therefore if must happen in two steps
     local package_on_remote
-    package_on_remote=$( curl -L --fail "${source_url}/${bucket}/%{pkgname}" )
+    package_on_remote=$( curl -L --fail "${source_url}/${bucket}/${pkgname}" )
 
     if [[ $? -ne 0 ]] ; then
         printf -- 'Package not available on source\n'
