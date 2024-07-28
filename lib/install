@@ -27,7 +27,7 @@ function check_pkg_dir_not_empty() {
         return 1
     fi
 
-    readarray -t arrayPkgFiles < <(find "${CS_PACKAGES_DIR}/${bucket}" -type f -printf '%f\n')
+    readarray -t arrayPkgFiles < <(find "${CS_PACKAGES_DIR}/${bucket}" -name "*.$PKGEXT" -type f -printf '%f\n')
 
     if [[ "${#arrayPkgFiles[@]}" -eq 0 ]] ; then
         return 2
