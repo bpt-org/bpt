@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
-
+#::usage
+#bpt build <bucket>/<program>
+#::summary
+#Create a package from a PKGBUILD
+#::help
+#The packages provided by apt|rpm|pacman are built on a clean environment
+#to prevent missing dependencies when installed on the target systems.
+#This way the package manager fills the missing libraries by requiring
+#the installation of secondary programs, called dependencies.
+#
+#bpt builds packages directly on the host system, therefore it depends
+#on the libraries available there. This allow to quickly generate packages
+#ready for use with the downside of not being portable to other machines.
+#::pleh
 source "${CS_ROOT}/${CS_NAME}/lib/build"
 
 function build_program() {

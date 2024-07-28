@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
-
+#::usage
+#bpt fetch <bucket>/<program>
+#::summary
+#Download a package from a source
+#::help
+#It reads the sources.list for a bucket match and tries to fetch
+#a package ready for installation. The package must be built for the
+#host system or it may fail for missing library dependencies.
+#::pleh
 source "${CS_ROOT}/${CS_NAME}/lib/shared"
 
 function fetch_program() {

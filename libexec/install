@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
-
+#::usage
+#bpt install <bucket>/<program>
+#::summary
+#Install a saved package
+#::help
+#It reads the directory of packages and tries to install files that match
+#the given name and the given bucket. If more than one package is available
+#the user will be prompted to choose one.
+#
+#Downgrades and upgrades replace the current installation and don't save
+#configuration files saved inside the program directory.
+#::pleh
 source "${CS_ROOT}/${CS_NAME}/lib/install"
 
 function install_program() {

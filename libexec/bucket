@@ -1,5 +1,21 @@
 #!/usr/bin/env bash
-
+#::usage
+#bpt bucket add|remove|list [<args>]
+#::summary
+#Manage bpt buckets
+#::help
+#Buckets are repositories of package build description files (PKGBUILD) that
+#allow you to compile a program from source for later installation.
+#
+#bpt comes with a default bucket, but you can also add buckets that
+#others have published.
+#
+#To add a bucket:
+#    bpt bucket add <name> [<repo>]
+#
+#To list added buckets:
+#    bpt bucket list
+#::pleh
 source "${CS_ROOT}/${CS_NAME}/lib/bucket"
 
 case "$1" in

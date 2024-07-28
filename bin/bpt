@@ -52,6 +52,10 @@ case "$1" in
         shift
         exec "${CS_ROOT}/${CS_NAME}/libexec/fetch" "$@"
         ;;
+    help)
+        shift
+        exec "${CS_ROOT}/${CS_NAME}/libexec/help" "$@"
+        ;;
     *)
         printf -- 'error: %s: unknown command\n' "$1"
         exit

@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
-
+#::usage
+#bpt init
+#::summary
+#Initialize files and directories
+#::help
+#Programs need a root path to be installed and their binary files
+#must be available in PATH for the current user to use them. This
+#command prepares all the files and directories necessary to
+#ensure the proper functioning of bpt and the programs it installs.
+#::pleh
 source "${CS_ROOT}/${CS_NAME}/lib/init"
 
 function init_all() {

@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
-
+#::usage
+#bpt list
+#::summary
+#List currently installed programs
+#::help
+#The files available here have mayor precedence over the ones
+#installed on the system.
+#::pleh
 source "${CS_ROOT}/${CS_NAME}/lib/list"
 
 tools_list

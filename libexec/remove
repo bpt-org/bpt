@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
-
+#::usage
+#bpt remove <program>
+#::summary
+#Remove a program
+#::help
+#The configurations made inside the program's root folder are not
+#backed up.
+#
+#There is no need to specify the bucket as programs from all buckets
+#are installed on the same location with no further differentiation.
+#::pleh
 source "${CS_ROOT}/${CS_NAME}/lib/remove"
 
 
