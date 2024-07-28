@@ -48,6 +48,10 @@ case "$1" in
         source "${CS_ROOT}/${CS_NAME}/libexec/init"
         init_all
         ;;
+    fetch)
+        shift
+        exec "${CS_ROOT}/${CS_NAME}/libexec/fetch" "$@"
+        ;;
     *)
         printf -- 'error: %s: unknown command\n' "$1"
         exit

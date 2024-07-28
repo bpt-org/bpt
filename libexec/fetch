@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+source "${CS_ROOT}/${CS_NAME}/lib/shared"
+
+function fetch_program() {
+
+    local program="$1"
+
+    local input_info=( $(get_bucket_and_program "$program") )
+
+    if [[ $? -eq 3 ]] ; then
+        printf -- 'error: nested buckets not allowed\n'
+    fi
+
+    local bucket=${input_info[0]}
+    local program=${input_info[1]}
+
+    local has_source=$(grep -m 1 $bucket $CS_KNOWN_SOURCES)
+
+    if [[ -z "$has_source" ]] ; then
+        printf -- 'No sources available for %s packages\n' "$bucket"
+    fi
+
+    local source_url="$(printf -- "$has_source" | cut -d ' ' -f2)"
+
+    source "${CS_BUCKETS_DIR}/${bucket}/${program}/PKGBUILD"
+
+    local target_dirname="${CS_PACKAGES_DIR}/${bucket}"
+    local package_basename="${pkgname}-${pkgver}-${pkgrel}${PKGEXT}"
+
+    local remote_dirname="${source_url}/${bucket}/${package_basename}"
+
+    echo $remote_dirname
+
+    mkdir -p "$target_dirname"
+
+    
+    curl -L --fail "${remote_dirname}" \
+        --output "${target_dirname}/${package_basename}"
+
+    if [[ -$? -ne 0 ]] ; then
+        printf -- 'info: 404 means package does not exist\n'
+        printf -- 'info: 403 means lack of permissions to download\n'
+        printf -- 'Failed to fetch package version %s-%s from server\n' "$pkgver" "$pkgrel"
+        exit
+    fi
+
+    bpt install "${bucket}/${program}"
+
+}
+
+fetch_program "$1"
