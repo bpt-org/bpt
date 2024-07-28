@@ -26,17 +26,24 @@ function fetch_program() {
     source "${CS_BUCKETS_DIR}/${bucket}/${program}/PKGBUILD"
 
     local target_dirname="${CS_PACKAGES_DIR}/${bucket}"
-    local package_basename="${pkgname}-${pkgver}-${pkgrel}${PKGEXT}"
 
-    local remote_dirname="${source_url}/${bucket}/${package_basename}"
-
-    echo $remote_dirname
+    printf -- '%s\n' "$remote_dirname"
 
     mkdir -p "$target_dirname"
 
-    
-    curl -L --fail "${remote_dirname}" \
-        --output "${target_dirname}/${package_basename}"
+    # The exit status of the command is overridden by the
+    # exit status of the creation of the local variable;
+    # therefore if must happen in two steps
+    local package_on_remote
+    package_on_remote=$( curl -L --fail "${source_url}/${bucket}/%{pkgname}" )
+
+    if [[ $? -ne 0 ]] ; then
+        printf -- 'Package not available on source\n'
+        exit
+    fi
+
+    curl -L --fail "${source_url}/${bucket}/${package_on_remote}" \
+        --output "${target_dirname}/${package_on_remote}"
 
     if [[ -$? -ne 0 ]] ; then
         printf -- 'info: 404 means package does not exist\n'

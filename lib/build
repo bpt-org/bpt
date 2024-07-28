@@ -152,6 +152,8 @@ function run_package() {
     mkdir -p "${CS_PACKAGES_DIR}/${bucket}"
     tar -cf "${CS_PACKAGES_DIR}/${bucket}/${pkgname}-${pkgver}-${pkgrel}.tar.xz" -C "${pkgdir}" .
 
+    printf '%s-%s-%s.tar.xz' "$pkgname" "$pkgver" "$pkgrel"  > "${CS_PACKAGES_DIR}/${bucket}/${pkgname}"
+
 }
 
 function run_cleanup() {
