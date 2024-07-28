@@ -43,10 +43,6 @@ function get_pkg_matches() {
 
          local pkg_info=( $(get_name_version_release "$pkg") )
 
-         if [[ ${#pkg_info} -eq 1 ]] ; then
-             continue
-         fi
-
          local pkg_name=${pkg_info[0]}
          local pkg_ver=${pkg_info[1]}
          local pkg_rel=${pkg_info[2]}
