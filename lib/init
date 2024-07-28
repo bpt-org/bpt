@@ -37,7 +37,7 @@ function init_preppend_path() {
 
     printf -- '==> Prepending %s symlinks to PATH\n' "${CS_NAME}"
 
-    local is_in_path=$(grep "\$HOME/.local/bin" $HOME/.bashrc )
+    local is_in_path=$(grep "\$HOME/.local/opt/bin" $HOME/.bashrc )
 
     if [[ -n "$is_in_path" ]] ; then
         printf ' -> Already in path. Skipping.\n'
