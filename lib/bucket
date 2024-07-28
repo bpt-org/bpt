@@ -36,7 +36,7 @@ function bucket_add() {
 
     if [[ -z $url && -z $is_official ]] ; then
         printf -- 'error: two parameters required\n'
-        exit
+        exit 1
 
     elif [[ -n $url && -z $is_official ]] ; then
         valid_url "$url"

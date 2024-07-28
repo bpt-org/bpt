@@ -18,10 +18,23 @@ function fetch_program() {
     local has_source=$(grep -m 1 $bucket $CS_KNOWN_SOURCES)
 
     if [[ -z "$has_source" ]] ; then
-        printf -- 'No sources available for %s packages\n' "$bucket"
+        printf -- 'No sources available for %s bucket\n' "$bucket"
+        exit
     fi
 
     local source_url="$(printf -- "$has_source" | cut -d ' ' -f2)"
+
+    if [[ ! -d "${CS_BUCKETS_DIR}/${bucket}" ]] ; then
+        printf -- 'warning: bucket %s not available\n' "$bucket"
+        printf -- 'warning: searching on bucket list\n'
+        bpt bucket add "$bucket"
+
+        if [[ $? -ne 0 ]] ; then
+            printf -- 'error: unkown bucket\n'
+            exit 1
+        fi
+
+    fi
 
     source "${CS_BUCKETS_DIR}/${bucket}/${program}/PKGBUILD"
 
