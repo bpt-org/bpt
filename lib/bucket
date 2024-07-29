@@ -124,10 +124,10 @@ function bucket_add() {
     fi
 
     if [[ $_git_exit_code -ne 0 ]] ; then
-        return 6
+        exit 6
     fi
 
-    return 0
+    exit 0
 
 }
 
@@ -138,6 +138,9 @@ function bucket_add() {
 # Outputs:
 #   Info when no buckets added
 #   Buckets installed separated by \n
+# Returns:
+#   0 after printing buckets
+#   1 if there are no buckets installed
 #######################################
 function bucket_list() {
 
@@ -145,13 +148,15 @@ function bucket_list() {
     readarray -t arrayBuckets < <(find "${CS_BUCKETS_DIR}" -maxdepth 1 -mindepth 1 -type d -printf "%f\n")
 
     if [[ "${#arrayBuckets[@]}" -eq 0 ]] ; then
-        printf -- 'There are no buckets installed\n'
-        exit
+        inf "There are no buckets installed"
+        exit 1
     fi
 
     for b in "${arrayBuckets[@]}" ; do
         printf -- '%s\n' "$b"
     done
+
+    exit 0
 
 }
 
