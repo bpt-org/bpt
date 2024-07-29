@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+function err() {
+    printf -- 'error: %s\n' "$*" >&2
+}
+
+function log_to_file() {
+    printf -- '[$(date +'%Y-%m-%dT%H:%M:%S%z')]: %s\n' "$*"
+}
+
+function inf() {
+    printf -- 'info: %s\n' "$*"
+}
+
+function war() {
+    printf -- 'warning: %s\n' "$*"
+}
