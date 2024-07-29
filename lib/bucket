@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+#######################################
+# Check the url protocol
+# Arguments:
+#   URL string
+# Outputs:
+#   Nothing if the protocol is valid
+#   Error if protocol is not valid
+#######################################
 function valid_url() {
 
     local url="$1"
@@ -16,6 +24,22 @@ function valid_url() {
 
 }
 
+#######################################
+# Add a bucket to bpt
+# Globals:
+#   CS_BUCKETS_DIR
+#   CS_KNOWN_BUCKETS
+# Arguments:
+#   Name of the bucket
+#   Url of the bucket repository
+# Outputs:
+#   Info of bucket when in known lists
+#   Warning when using a reserved bucket name
+#   Error when input is incorrect
+# Returns:
+#  0 when bucket added succesfuly
+#  1 when input is incorrect
+#######################################
 function bucket_add() {
 
     local name="$1"
@@ -62,6 +86,14 @@ function bucket_add() {
 
 }
 
+#######################################
+# List buckets added on bpt
+# Globals:
+#   CS_BUCKETS_DIR
+# Outputs:
+#   Info when no buckets added
+#   Buckets installed separated by \n
+#######################################
 function bucket_list() {
 
     local arrayBuckets=()
@@ -78,6 +110,17 @@ function bucket_list() {
 
 }
 
+#######################################
+# Remove a bucket of bpt
+# Globals:
+#   CS_BUCKETS_DIR
+# Arguments:
+#   Bucket for removal
+# Outputs:
+#   Info of succesful removal
+#   Error on empty input
+#   Error when bpt has no buckets
+#######################################
 function bucket_remove() {
 
     local target="$1"
