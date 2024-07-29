@@ -23,7 +23,7 @@ function valid_url() {
             return 0
             ;;
         *)
-            err "$_protocol not supported"
+            err "$_protocol protocol not supported"
             exit 1
             ;;
     esac
