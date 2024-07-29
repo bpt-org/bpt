@@ -10,13 +10,13 @@ source "${CS_ROOT}/${CS_NAME}/lib/core"
 #   Nothing if the protocol is valid
 #   Error if protocol is not valid
 # Returns:
-#   0 if protocol is supported
-#   1 if protocol is not supported
+#   0 if protocol is http
+#   1 if protocol is not http
 #######################################
-function valid_url() {
+function _check_url_protocol() {
 
-    local _url="$1"
-    local _protocol=$(printf -- "$_url" | cut -d ':' -f1)
+    local url="$1"
+    local protocol=$(printf -- "$url" | cut -d ':' -f1)
 
     case $_protocol in
         https|http)
@@ -24,7 +24,7 @@ function valid_url() {
             ;;
         *)
             err "$_protocol protocol not supported"
-            exit 1
+            exit 4
             ;;
     esac
 
@@ -43,52 +43,91 @@ function valid_url() {
 #   Warning when using a reserved bucket name
 #   Error when input is incorrect
 # Returns:
-#  0 when bucket added succesfuly
-#  1 when input is incorrect
+#  0 bucket added  succesfuly
+#  1 bucket name not provided
+#  2 bucket not known and url not provided
+#  3 bucket already exists
+#  4 url protocol not supported
+#  5 grep failure
+#  6 git failure
 #######################################
 function bucket_add() {
 
     local name="$1"
     local url="$2"
 
-    if [[ -z $name ]] ; then
-        printf -- 'error: bucket name not provided\n'
-        exit
-    fi
+    local _bucket_match
+    local _known_bucket
+    local _branch
 
-    if [[ -d "${CS_BUCKETS_DIR}/${name}/.git" ]] ; then
-        local git_output=$(git -C "${CS_BUCKETS_DIR}/${name}" pull)
-        printf ' -> %s\n' "$git_output"
-        exit
-    fi
+    local _git_exit_code
 
-    local is_official=$(grep "$name" $CS_KNOWN_BUCKETS)
+    _bucket_match="$(grep -m 1 "$name" "$CS_KNOWN_BUCKETS")"
+    _known_bucket=$?
+    _branch=""
 
-    if [[ -z $url && -z $is_official ]] ; then
-        printf -- 'error: two parameters required\n'
+    if [[ -z "$name" ]] ; then
+        err "bucket name not provided"
         exit 1
+    fi
 
-    elif [[ -n $url && -z $is_official ]] ; then
-        valid_url "$url"
+    # Try to provide a valid URL
+    # or give non-zero exit status
 
-    elif [[ -z $url && -n $is_official ]] ; then
-        url="$(printf -- "$is_official" | cut -d ' ' -f2)"
-        printf -- 'info: known bucket\n'
-        printf -- 'info: %s\n' "$url"
+    if [[ -z "$url" ]] ; then
+        inf "searching on known buckets list"
 
-        local branch="$(printf -- "$is_official" | cut -d ' ' -f3)"
+        if [[ $_known_bucket -eq 1 ]] ; then
+            err "bucket not found"
+            exit 2
 
-        if [[ -n "$branch" ]] ; then
-            git clone -b "$branch" "$url" "${CS_BUCKETS_DIR}/${name}"
-            return
+        elif [[ $_known_bucket -eq 2 ]] ; then
+            err "grep failure"
+            exit 5
+
+        else
+            url="$(printf -- "$_bucket_match" | cut -d ' ' -f2)"
+            _branch="$(printf -- "$_bucket_match" | cut -d ' ' -f3)"
+            _check_url_protocol "$url"
         fi
 
-    elif [[ -n $url && -n $is_official ]] ; then
-        printf -- 'warning: overriding a known bucket\n'
-        valid_url "$url"
+    # If the url is valid
+    # check if it matches
+    # a known bucket
+
+    else
+        if [[ $_known_bucket -eq 0 ]] ; then
+            war "overriding a known bucket"
+
+        elif [[ $_known_bucket -eq 2 ]] ; then
+            war "grep failure"
+            war "ignoring buckets.list"
+        fi
+
+        _check_url_protocol "$url"
     fi
 
-    git clone "$url" "${CS_BUCKETS_DIR}/${name}"
+    # Avoid unhandled git errors
+    # by catching all outcomes
+
+    if [[ -d "${CS_BUCKETS_DIR}/${name}/.git" ]] ; then
+        err "bucket of the same name already exists"
+        exit 3
+
+    elif [[ -n "$_branch" ]] ; then
+        git clone -b "$_branch" "$url" "${CS_BUCKETS_DIR}/${name}"
+        _git_exit_code=$?
+
+    elif [[ -z "$_branch" ]] ; then
+        git clone "$url" "${CS_BUCKETS_DIR}/${name}"
+        _git_exit_code=$?
+    fi
+
+    if [[ $_git_exit_code -ne 0 ]] ; then
+        return 6
+    fi
+
+    return 0
 
 }
 
