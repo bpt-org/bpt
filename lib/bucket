@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "${CS_ROOT}/${CS_NAME}/lib/core"
+
 #######################################
 # Check the url protocol
 # Arguments:
@@ -7,18 +9,22 @@
 # Outputs:
 #   Nothing if the protocol is valid
 #   Error if protocol is not valid
+# Returns:
+#   0 if protocol is supported
+#   1 if protocol is not supported
 #######################################
 function valid_url() {
 
-    local url="$1"
-    local protocol=$(printf -- "$url" | cut -d ':' -f1)
+    local _url="$1"
+    local _protocol=$(printf -- "$_url" | cut -d ':' -f1)
 
-    case $protocol in
+    case $_protocol in
         https|http)
+            return 0
             ;;
         *)
-            printf -- 'error: %s: protocol not supported\n' "$protocol"
-            exit
+            err "$_protocol not supported"
+            exit 1
             ;;
     esac
 
