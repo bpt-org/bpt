@@ -28,9 +28,9 @@ bpt needs to be unpacked manually:
 tar -xf bpt-any.tar.xz -C $HOME/.local/opt
 ```
 
-Then chmod and run the deployment script:
+Then initialize it:
 ```
-$HOME/.local/opt/libexec/deploy
+$HOME/.local/opt/bpt/bin/bpt init
 ```
 
 ## Philosophy
@@ -45,7 +45,7 @@ HOME/.local/opt/bin/bpt
 HOME/.local/opt/etc
 HOME/.local/opt/etc/bpt
 HOME/.local/opt/etc/bpt/bpt.conf
-HOME/.local/opt/etc/bpt/bpt.conf.d
+HOME/.local/opt/etc/buckets.list
 HOME/.local/opt/etc/sources.list
 HOME/.local/opt/var
 HOME/.local/opt/var/packages
@@ -82,7 +82,7 @@ directly files from AUR. We don't endorse DDoSSing their servers with queries.
 
 bpt offers a default bucket called `main` with a selection of progrmas. The name
 does not have to be prefixed to install programs, unless the default bucket
-is changed with `--main-bucket|-m`.
+is changed with inside `bpt.conf`.
 
 Every package built from a bucket will become available inside `ROOT/var/packages`.
 
