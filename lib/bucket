@@ -147,3 +147,31 @@ function bucket_remove() {
     done
 
 }
+
+#######################################
+# Updates all bucket repositories
+# Globals
+#   CS_BUCKETS_DIR
+#   CS_NAME
+# Outputs
+#   Info of git update status
+# Returns
+#   0 if updates succesfuly
+#   1 if there are no buckets added
+#######################################
+function bucket_update() {
+
+    local arrayBuckets=()
+    readarray -t arrayBuckets < <($CS_NAME bucket list)
+
+    if [[ ${#arrayBuckets[@]} -eq 0 ]] ; then
+        printf -- 'There are no buckets installed\n'
+        return 1
+    fi
+
+    for b in "${arrayBuckets[@]}" ; do
+        printf -- 'Updating %s\n' "$b"
+        git -C "${CS_BUCKETS_DIR}/$b" pull
+    done
+
+}

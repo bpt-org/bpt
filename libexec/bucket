@@ -35,6 +35,11 @@ case "$1" in
         bucket_list "$@"
         exit
         ;;
+    update)
+        shift
+        bucket_update "$@"
+        exit
+        ;;
     *)
         printf -- 'error: %s: unknown command\n' "$1"
         exit
