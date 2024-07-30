@@ -93,6 +93,9 @@ function bucket_add() {
 # Outputs:
 #   Info when no buckets added
 #   Buckets installed separated by \n
+# Returns:
+#   0 on success
+#   1 if there are no buckets installed
 #######################################
 function bucket_list() {
 
@@ -101,7 +104,7 @@ function bucket_list() {
 
     if [[ "${#arrayBuckets[@]}" -eq 0 ]] ; then
         printf -- 'There are no buckets installed\n'
-        exit
+        return 1
     fi
 
     for b in "${arrayBuckets[@]}" ; do
@@ -131,12 +134,14 @@ function bucket_remove() {
     fi
 
     local arrayBuckets=()
-    readarray -t arrayBuckets < <($CS_NAME bucket list)
+    _bucket_list=$($CS_NAME bucket list)
 
-    if [[ "${#arrayBuckets[@]}" -eq 0 ]] ; then
-        printf -- 'error: there are no buckets added\n'
-        exit
+    if [[ $? -ne 0 ]] ; then
+        printf -- 'There are no buckets installed\n'
+        return 1
     fi
+
+    readarray -t arrayBuckets < <(printf -- "$_bucket_list")
 
     for b in "${arrayBuckets[@]}" ; do
         if [[ "$target" == "$b" ]] ; then
@@ -162,12 +167,14 @@ function bucket_remove() {
 function bucket_update() {
 
     local arrayBuckets=()
-    readarray -t arrayBuckets < <($CS_NAME bucket list)
+    _bucket_list=$($CS_NAME bucket list)
 
-    if [[ ${#arrayBuckets[@]} -eq 0 ]] ; then
+    if [[ $? -ne 0 ]] ; then
         printf -- 'There are no buckets installed\n'
         return 1
     fi
+
+    readarray -t arrayBuckets < <(printf -- "$_bucket_list")
 
     for b in "${arrayBuckets[@]}" ; do
         printf -- 'Updating %s\n' "$b"
