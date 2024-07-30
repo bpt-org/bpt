@@ -33,7 +33,7 @@ source ~/.bashrc
 
 bpt organizes its directories under `$HOME/.local` to follow the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) about dotfiles.
 
-To avoid colliding with XDG, bpt mimics the `[/opt](https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch03s13.html)` directory structure of the Filesystem Hierarchy Standard.
+To avoid colliding with XDG, bpt mimics the [`/opt`](https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch03s13.html) directory structure of the Filesystem Hierarchy Standard.
 
 ```
 $HOME/.local
