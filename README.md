@@ -1,6 +1,6 @@
 # bpt - Basic/Bash Package Tooling
 
-> Skip to [Installation](#installation) | [Philosophy](#philosophy)
+> Skip to [Installation](#installation) | [Usage](#usage) | [Philosophy](#philosophy) | [Personal Comments](#personal-comments)
 
 Non-root package manager for Linux.
 
@@ -37,6 +37,150 @@ source ~/.bashrc
 ```
 bpt help
 ```
+
+## Usage
+
+### Help
+
+* You can check the list of available commands:
+
+```
+bpt help
+---
+bpt - Basic/Bash Package Tool
+
+  Available Commands:
+    remove           Remove a program                        
+    help             Prints this help message                
+    list             List currently installed programs       
+    build            Create a package from a PKGBUILD        
+    init             Initialize files and directories        
+    fetch            Download a package from a source        
+    bucket           Manage bpt buckets                      
+    install          Install a saved package   
+```
+
+* To see help for individual commands:
+
+```
+bpt help build
+---
+ bpt build <bucket>/<program>
+
+ The packages provided by apt|rpm|pacman are built on a clean environment
+ to prevent missing dependencies when installed on the target systems.
+ This way the package manager fills the missing libraries by requiring
+ the installation of secondary programs, called dependencies.
+ 
+ bpt builds packages directly on the host system, therefore it depends
+ on the libraries available there. This allow to quickly generate packages
+ ready for use with the downside of not being portable to other machines.
+```
+
+### Build and Install
+
+bpt needs to build the packages before installing them. It has a list of
+PKGBUILD files inside the default bucket `main` with the instructions
+required to automatize this process.
+
+> Note: Currently only available `curl` and `libarchive`.
+
+* To build the program `curl`:
+```
+bpt build curl
+```
+
+This will create a package compatible with bpt for the current Linux machine.
+
+* To install the `curl` package built on the previous step:
+```
+bpt install curl
+```
+
+This will search for a built package and install it.
+If more than one version is available, a selector will appear.
+
+* To remove the program:
+```
+bpt remove curl
+```
+
+The program name must be given, as not all executables match the program name.
+
+* To list all **executables** available via bpt:
+```
+bpt list
+```
+
+For instance, libarchive installs multiple binary files (none of them named 'libarchive').
+
+### Buckets
+
+* To obtain more PKBUILTD's than the ones provided by the `main` bucket:
+
+```
+bpt bucket add <bucket>
+```
+
+There's currently a bucket called `anakena` available for Universidad de Chile,
+let's try to install the program `dcc-tools` from there:
+
+1. Add the bucket:
+```
+bpt bucket add anakena
+```
+
+You don't need to provide an url for anakena since it is listed as a known
+bucket inside `$HOME/.local/opt/etc/bpt/buckets.list`.
+
+2. Build the program:
+```
+bpt build anakena/dcc-tools
+```
+
+You need to prefix the bucket since it is different from `main`.
+
+3. Install the program:
+```
+bpt install anakena/dcc-tools
+```
+
+You need to prefix the bucket, this limitation was added to improve
+the downloading and serving of packages via Apache User Directories.
+
+4. To list all buckets added:
+```
+bpt bucket list
+```
+
+5. The bucket can be removed as well:
+```
+bpt bucket remove anakena
+```
+
+This will not remove the installed programs.
+
+> Note: The bucket command aims to provide feature parity with scoop.
+
+### Distribute and Fetch
+
+bpt reads the file `$HOME/.local/opt/etc/bpt/bpt.conf` from where the
+destination directory of the packages can be changed. This way a user can use
+it's personal Apache User Directory to directly serve its built packages
+to other users on the shared Linux machine.
+
+To fetch a built package of dcc-tools:
+```
+bpt fetch anakena/dcc-tools
+```
+
+A match for `anakena` will be done inside `$HOME/.local/opt/etc/bpt/sources.list`,
+a repository served by the user tvillega in a server of Universidad de Chile.
+
+This will download the package to the packages directory.
+The bucket `anakena` will be added if it wasn't added before
+(because it is a known bucket). When the package has succesfuly
+been downloaded, a prompt will ask the user to proceed with installation.
 
 ## Philosophy
 
@@ -150,6 +294,43 @@ The following buckets are known to bpt:
 * [anakena](https://github.com/tvillega/dcc-tools/tree/bpt) - Official bucket for Universidad de Chile's DCC server.
 
 We don't endorse the automatized pulling of PKGBUILD from Archlinux servers.
+
+## Personal Comments
+
+Despite all my efforts to provide a stable and consistent program,
+bash was numerous quirks and some programming choices are somewhat hacky.
+
+For example, when a coreutils program fails to parse a string or has zero matches,
+it returns an empty string. In many locations the functions interpret the empty string
+as a failure, but sometimes the output is an error message and it feeds a bash array
+with garbage values than then make a snowball of issues.
+
+I tried to use exit codes, but everything became too verbose and overengineered.
+A revision must be done on this to achieve a good balance between stability and sanity.
+
+Bash arrays are a godsent, I no longer need to parse `ls` output or glob expansion,
+storing `find` searches on arrays instead. I give all the credits of this program
+to bash arrays, that's why bpt needs bash 4 or later to work.
+
+Another pivotal design choice was the scoop directory structure. The original bpt had
+almost 500 lines of codes and it was slowly becoming inhuman to develop.
+
+I code in `nano` (with bash highlights on), enabling the shared buffer with the `-F` option
+to open multiple files and share the clipboard, and I also use the `-c` option to
+have the columns/rows indicator on the bottom center.
+
+I complement the afromented workflow by working inside a `tmux` session, this way I can test
+the program, code it, and commit on different virtual windows. (I don't necesarily code
+on the same machine Linux is running, therefore this works everywhere where there's ssh and a keyboard).
+
+bpt is a mix of Scoop, Apt (the sources.list), Archlinux, XDG, an FHS concepts, so it can be a little hard
+to grasp at first. However, I promise consistency on the choices, and if you are familiar
+with one you'll understand the whole thing fairly quickly.
+
+I don't document `buckets.list` and `sources.list` since they are currently a WIP and
+they don't enforce much at the moment (I just match names with URL's in a hacky, unstable way).
+
+And I thank my cat for keeping my lap warm. 3 AM is a really cold time of the day.
 
 ## Contributing
 
