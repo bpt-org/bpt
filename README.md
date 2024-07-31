@@ -60,7 +60,27 @@ $HOME/.local
 
 ```
 
-Every new program will be installed on `$HOME/.local/opt` inside its own folder, for example `curl`:
+The internal bpt directory structure mimics the one used by [`scoop`](https://github.com/ScoopInstaller/Scoop):
+
+* `bin`: executables that will be available in PATH.
+* `libexec`: subcommands that will be called from `bpt`.
+* `lib`: functions that execute the actions of the subcommands.
+
+Some important points:
+
+* Every subcommand in `libexec` has a counterpart file inside `lib`.
+* Some `lib` files are auxiliar functions and have no counterpart inside `libexec`.
+* Files inside `libexec` are executed by bash, therefore have execution permissions.
+* Files inside `lib` are sourced by bash, therefore do not have execution permissions.
+
+Configurable files:
+
+* `buckets.list`: buckets whose url is known by bpt and will be autofilled.
+* `sources.list`: sources where bpt can pull ready-to-install packages.
+* `bpt.conf`: settings for the users to tweak the bpt behaviour.
+
+
+Every new program will be installed on `$HOME/.local/opt` inside its own folder, for example `curl` side by side with `bpt`:
 
 ```
 $HOME/.local/opt
@@ -90,6 +110,9 @@ $HOME/.local/opt
 ```
 
 Executable files are symlinked to `$HOME/.local/opt/bin`, which is added to PATH with `.bashrc`.
+
+
+* `bin`
 
 ### Packages
 
