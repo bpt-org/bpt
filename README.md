@@ -10,7 +10,13 @@ bpt allows to compile, package, and install Linux programs inside the user's `$H
 
 ## Installation
 
-1. Download de latest release from GitHub.
+1. Download de latest release from GitHub to your `$HOME`.
+
+> e.g. for the release X.Y.Z
+
+```
+curl -L -O https://github.com/bpt-org/bpt/releases/download/vX.Y.Z/bpt-any.tar.xz
+```
 
 2. Unpackage it on the target directory defined below:
 ```
@@ -25,6 +31,11 @@ $HOME/.local/opt/bpt/bin/bpt init
 4. Update your bash environment:
 ```
 source ~/.bashrc
+```
+
+5. Check the program's help:
+```
+bpt help
 ```
 
 ## Philosophy
