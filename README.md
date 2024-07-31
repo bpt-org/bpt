@@ -267,8 +267,6 @@ $HOME/.local/opt
 Executable files are symlinked to `$HOME/.local/opt/bin`, which is added to PATH with `.bashrc`.
 
 
-* `bin`
-
 ### Packages
 
 The Bpt Build System (BPS) is inspired on the [Archlinux Build System](https://wiki.archlinux.org/title/Arch_build_system).
