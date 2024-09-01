@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source "${CS_ROOT}/${CS_NAME}/lib/shared"
+source "${CS_ROOT}/${CS_NAME}/lib/semver"
 
 function deploy_symlinks() {
 
@@ -65,8 +66,6 @@ function match_single() {
     local pkg_info=( $(get_name_version_release "${arrayTargetPkg[0]}") )
     local pkg_ver=${pkg_info[1]}
 
-    printf -- 'Package version is %s. Proceed? [y|n] ' "${pkg_ver}"
-    answer_yes_or_exit
     unpack_tarball "${arrayTargetPkg[0]}" "$pkg_bucket"
 
 }
@@ -110,20 +109,32 @@ function unpack_tarball() {
     local pkg_ver=${pkg_info[1]}
     local pkg_rel=${pkg_info[2]}
 
+    local pkg_verrel="${pkg_ver}-${pkg_rel}"
+
     if [[ -d "${CS_ROOT}/${pkg_name}" ]] ; then
         source "${CS_ROOT}/${pkg_name}/.PKGINFO"
+        local pkgverrel="${pkgver}-${pkgrel}"
 
-        if [[ "$pkg_ver" != "$pkgver" ]] ; then
+        printf -- 'Version %s installed. ' "$pkgverrel"
 
-            printf -- 'Version %s installed. Replace with version %s? [y|n] ' "$pkgver" "$pkg_ver"
+        local _sv_cmp
+        _sv_cmp=$(semver_compare "$pkgverrel" "$pkg_verrel")
+
+        if [[ _sv_cmp -eq 0 ]] ; then
+            printf -- 'Reinstall [y/n] '
             answer_yes_or_exit
-            printf -- '==> Updating %s\n' "$pkg_name"
+            printf -- '==> Reinstalling %s\n' "$pkgname"
 
-        else
-
-            printf -- 'Package already installed. Reinstall? [y|n] '
+        elif [[ _sv_cmp -eq -1 ]] ; then
+            printf -- 'Upgrade to %s [y|n] ' "$pkg_verrel"
             answer_yes_or_exit
-            printf -- '==> Reinstalling %s\n' "$pkg_name"
+            printf -- '==> Upgrading %s\n' "$pkgname"
+
+        elif [[ _sv_cmp -eq 1 ]] ; then
+            printf -- 'Downgrade to %s [y|n] ' "$pkg_verrel"
+            answer_yes_or_exit
+            printf -- '==> Downgrading %s\n' "$pkgname"
+
         fi
 
     else
